@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const YEAR1_TIERS = [
   { months: 6, label: "6 months", discount: 0 },
@@ -178,10 +178,25 @@ function RenewalTier({ tier, selected, onClick, baseRent, hikeAmount, noLockInRe
 }
 
 export default function App() {
-  const [mrp, setMrp] = useState(35000);
+const getInitialMrp = () => {
+  const params = new URLSearchParams(window.location.search);
+  const value = Number(params.get("mrp"));
+  if (!isNaN(value) && value >= 15000 && value <= 80000) {
+    return value;
+  }
+  return 35000;
+};
+
+const [mrp, setMrp] = useState(getInitialMrp);
   const [y1TierIdx, setY1TierIdx] = useState(2);
   const [renewalTierIdx, setRenewalTierIdx] = useState(3);
   const [showRenewal, setShowRenewal] = useState(false);
+      useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    params.set("mrp", mrp);
+    const newUrl = `${window.location.pathname}?${params.toString()}`;
+    window.history.replaceState({}, "", newUrl);
+  }, [mrp]);
 
   const y1Tier = YEAR1_TIERS[y1TierIdx];
   const y1Rent = mrp - y1Tier.discount;
